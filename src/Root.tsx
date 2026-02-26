@@ -10,11 +10,13 @@ interface Props {
 }
 
 function Card(props: Props) {
-  return <div className="bg-yellow-200 border p-4 w-40 mx-3 mt-3">
-    <div className="text-center font-bold mb-2">{props.name}</div>
-    <img src={props.image} className="w-24 h-24 mb-2 mx-auto" />
+  return <div className="bg-yellow-200 rounded-xl p-4 w-48 mx-3 mt-3 shadow-lg">
+    <div className="text-center font-bold mb-3 text-sm">{props.name}</div>
+    <div className="bg-white rounded-lg p-3 mb-4 border-2 border-yellow-300">
+      <img src={props.image} className="w-full h-32 object-contain" />
+    </div>
     <div className="flex justify-center">
-      <button className="bg-green-500 text-white px-2 py-1 rounded">dettagli</button>
+      <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold">dettagli</button>
     </div>
   </div>;
 }
