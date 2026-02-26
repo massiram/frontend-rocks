@@ -10,13 +10,18 @@ interface Props {
 }
 
 function Card(props: Props) {
-  return <div className="bg-yellow-200 rounded-xl p-4 w-48 mx-3 mt-3 shadow-lg">
-    <div className="text-center font-bold mb-3 text-sm">{props.name}</div>
-    <div className="bg-white rounded-lg p-3 mb-4 border-2 border-yellow-300">
-      <img src={props.image} className="w-full h-32 object-contain" />
+  return <div className="bg-yellow-300 rounded-3xl p-6 w-80 mx-3 mt-3 shadow-xl border-4 border-yellow-400">
+    <div className="text-center font-bold mb-2 text-lg">{props.name}</div>
+    <div className="bg-white rounded-2xl p-4 mb-4 border-4 border-yellow-400 aspect-square flex items-center justify-center">
+      <img src={props.image} className="w-full h-full object-contain" />
+    </div>
+    <div className="bg-yellow-100 rounded-xl p-4 mb-4">
+      <div className="text-xs text-gray-700">Tipo: {props.types.join(", ")}</div>
     </div>
     <div className="flex justify-center">
-      <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold">dettagli</button>
+      <button className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-full font-bold text-lg shadow-md">
+        dettagli
+      </button>
     </div>
   </div>;
 }
