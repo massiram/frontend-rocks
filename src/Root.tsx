@@ -18,21 +18,21 @@ type Props = {
 }
 
 function Card(props: Props) {
-  
-  return <div>
-    {props.id}
-    {props.name}
-    <img src={props.image}
-  </div>
-  return null
+  return <div className="bg-yellow-200 border p-4 w-40 mx-3 mt-3">
+    <div className="text-center font-bold mb-2">{props.name}</div>
+    <img src={props.image} className="w-24 h-24 mb-2 mx-auto" />
+    <div className="flex justify-center">
+      <button className="bg-green-500 text-white px-2 py-1 rounded">dettagli</button>
+    </div>
+  </div>;
 }
 
 export function Root() {
   return <Card
     id={0}
-    image="https://placeholdit.com/400/dddddd/999999"
-    name="Pikachu"
-    types={["grass"]}
+    image="https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/025.png"
+    name="Pikachu - 0"
+    types={["electric"]}
     />
 }
 function getTypeColor(type: string): string {
