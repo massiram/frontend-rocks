@@ -10,50 +10,84 @@ interface Pokemon {
   name: string;
   image: string;
   types: string[];
-  abilities: string[];
+  abilityUrls: string[];
+}
+
+interface AbilityDetail {
+  name: string;
+  effect: string;
 }
 
 function Card({ pokemon }: { pokemon: Pokemon }) {
+  const [abilitiesDetails, setAbilitiesDetails] = useState<AbilityDetail[] | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+
+  async function loadAbilities() {
+    const details = await Promise.all(
+      pokemon.abilityUrls.map(async (url) => {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        // Prendo la descrizione in inglese
+        const effectEntry = data.effect_entries.find(
+          (e: any) => e.language.name === "en"
+        );
+
+        return {
+          name: data.name,
+          effect: effectEntry?.effect ?? "No description",
+        };
+      })
+    );
+
+    setAbilitiesDetails(details);
+  }
+
+  function toggleDetails() {
+    setShowDetails(!showDetails);
+    if (!abilitiesDetails) {
+      loadAbilities();
+    }
+  }
 
   return (
     <div className="w-80 mx-3 mt-6">
-      <div className="rounded-2xl p-3 bg-gradient-to-b from-yellow-300 to-yellow-500 border-8 border-yellow-600 shadow-2xl">
+      <div className="rounded-2xl p-3 bg-gradient-to-b from-yellow-300 to-yellow-500 border-8 border-yellow-600">
 
-        <div className="bg-yellow-200 border-4 border-yellow-600 rounded-xl px-3 py-1 mb-3">
-          <h2 className="font-extrabold text-lg capitalize">
-            {pokemon.name} - {pokemon.id}
-          </h2>
+        {/* Nome */}
+        <h2 className="font-extrabold text-lg capitalize mb-2">
+          {pokemon.name} − {pokemon.id}
+        </h2>
+
+        {/* Immagine */}
+        <div className="mb-3 aspect-square border-4 border-yellow-600 rounded-xl p-4 flex items-center justify-center bg-white">
+          <img src={pokemon.image} alt={pokemon.name} />
         </div>
 
-        <div className="bg-white border-4 border-yellow-600 rounded-xl p-4 mb-3 aspect-square flex items-center justify-center">
-          <img
-            src={pokemon.image}
-            className="w-full h-full object-contain"
-            alt={pokemon.name}
-          />
-        </div>
+        {/* Tipo */}
+        <p className="capitalize text-center mb-3">
+          Tipo: {pokemon.types.join(", ")}
+        </p>
 
-        <div className="bg-yellow-100 border-4 border-yellow-600 rounded-xl p-3 mb-4 text-center">
-          <p className="text-sm font-semibold capitalize">
-            Tipo: {pokemon.types.join(", ")}
-          </p>
-        </div>
+        {/* Button Dettagli */}
+        <button
+          onClick={toggleDetails}
+          className="bg-blue-600 text-white px-6 py-2 rounded-full font-bold mb-2"
+        >
+          {showDetails ? "Nascondi dettagli" : "Mostra dettagli"}
+        </button>
 
-        <div className="flex flex-col items-center">
-          <button
-            onClick={() => setShowDetails(!showDetails)}
-            className="bg-blue-600 text-white px-6 py-2 rounded-full font-bold"
-          >
-            Dettagli
-          </button>
-
-          {showDetails && (
-            <div className="mt-3 text-sm text-center capitalize">
-              Abilità: {pokemon.abilities.join(", ")}
-            </div>
-          )}
-        </div>
+        {/* Mostra Dettagli Abilità */}
+        {showDetails && abilitiesDetails && (
+          <div className="text-sm text-center text-gray-800">
+            {abilitiesDetails.map((abil) => (
+              <div key={abil.name} className="mb-2">
+                <strong className="capitalize">{abil.name}</strong>
+                <p>{abil.effect}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -62,7 +96,6 @@ function Card({ pokemon }: { pokemon: Pokemon }) {
 export function Root() {
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
   const [offset, setOffset] = useState(0);
-  const limit = 12; // primo caricamento
 
   async function fetchPokemons(newOffset: number, amount: number) {
     const res = await fetch(
@@ -81,8 +114,8 @@ export function Root() {
           image:
             details.sprites.other["official-artwork"].front_default,
           types: details.types.map((t: any) => t.type.name),
-          abilities: details.abilities.map(
-            (a: any) => a.ability.name
+          abilityUrls: details.abilities.map(
+            (a: any) => a.ability.url
           ),
         };
       })
@@ -91,15 +124,15 @@ export function Root() {
     setPokemons((prev) => [...prev, ...results]);
   }
 
-  useEffect(() => {
-    fetchPokemons(0, limit);
-  }, []);
-
   function loadMore() {
     const newOffset = offset + 20;
     setOffset(newOffset);
     fetchPokemons(newOffset, 20);
   }
+
+  useEffect(() => {
+    fetchPokemons(0, 12);
+  }, []);
 
   return (
     <div className="flex flex-col items-center">
@@ -111,9 +144,9 @@ export function Root() {
 
       <button
         onClick={loadMore}
-        className="mt-8 mb-10 bg-red-600 hover:bg-red-700 text-white px-10 py-3 rounded-full font-bold text-lg"
+        className="mt-6 mb-10 bg-red-600 text-white px-10 py-3 rounded-full font-bold"
       >
-        Carica altri 20 Pokémon
+        Carica altri Pokémon
       </button>
     </div>
   );
