@@ -20,7 +20,7 @@ function Card({ pokemon }: { pokemon: Pokemon }) {
     <div className="w-80 mx-3 mt-6">
       <div className="rounded-2xl p-4 bg-gradient-to-b from-yellow-300 to-yellow-500 border-8 border-yellow-600 shadow-2xl">
 
-        {/* PARTE ALTA */}
+        {/* HEADER */}
         <div className="flex justify-between items-center mb-3 bg-yellow-200 border-4 border-yellow-600 rounded-xl px-3 py-1">
           <div>
             <h2 className="font-extrabold text-lg capitalize">
@@ -45,7 +45,7 @@ function Card({ pokemon }: { pokemon: Pokemon }) {
           />
         </div>
 
-        {/* RIQUADRO TIPO */}
+        {/* TIPO */}
         <div className="bg-yellow-100 border-4 border-yellow-600 rounded-xl p-3 mb-4 text-center">
           <p className="text-sm font-semibold capitalize">
             Tipo: {pokemon.types.join(", ")}
@@ -89,6 +89,74 @@ function Card({ pokemon }: { pokemon: Pokemon }) {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+export function Root() {
+  const [pokemons, setPokemons] = useState<Pokemon[]>([]);
+  const [offset, setOffset] = useState(0);
+
+  async function fetchPokemons(newOffset: number, amount: number) {
+    const res = await fetch(
+      `https://pokeapi.co/api/v2/pokemon?offset=${newOffset}&limit=${amount}`
+    );
+    const data = await res.json();
+
+    const results: Pokemon[] = await Promise.all(
+      data.results.map(async (p: any) => {
+        const res = await fetch(p.url);
+        const details = await res.json();
+
+        return {
+          id: details.id,
+          name: details.name,
+          image:
+            details.sprites.other?.["official-artwork"]?.front_default ?? "",
+          types: details.types.map((t: any) => t.type.name),
+          abilities: details.abilities.map((a: any) => a.ability.name),
+
+          hp:
+            details.stats.find((s: any) => s.stat.name === "hp")?.base_stat ?? 0,
+
+          attack:
+            details.stats.find((s: any) => s.stat.name === "attack")?.base_stat ?? 0,
+
+          defense:
+            details.stats.find((s: any) => s.stat.name === "defense")?.base_stat ?? 0,
+        };
+      })
+    );
+
+    setPokemons((prev) => [...prev, ...results]);
+  }
+
+  function loadMore() {
+    setOffset((prev) => {
+      const newOffset = prev + 20;
+      fetchPokemons(newOffset, 20);
+      return newOffset;
+    });
+  }
+
+  useEffect(() => {
+    fetchPokemons(0, 12);
+  }, []);
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="flex flex-wrap justify-center">
+        {pokemons.map((pokemon) => (
+          <Card key={pokemon.id} pokemon={pokemon} />
+        ))}
+      </div>
+
+      <button
+        onClick={loadMore}
+        className="mt-8 mb-10 bg-red-600 hover:bg-red-700 text-white px-10 py-3 rounded-full font-bold"
+      >
+        Carica altri 20 Pokémon
+      </button>
     </div>
   );
 }
