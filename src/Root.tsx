@@ -3,61 +3,120 @@ import { Link } from "react-router";
 import { PokeAPI } from "./api";
 */
 
-interface Props {
-  image: string;
+import { useEffect, useState } from "react";
+
+interface Pokemon {
+  id: number;
   name: string;
+  image: string;
   types: string[];
+  abilities: string[];
 }
 
-function Card(props: Props) {
+function Card({ pokemon }: { pokemon: Pokemon }) {
+  const [showDetails, setShowDetails] = useState(false);
+
   return (
     <div className="w-80 mx-3 mt-6">
-      
-      {/* Card Container */}
       <div className="rounded-2xl p-3 bg-gradient-to-b from-yellow-300 to-yellow-500 border-8 border-yellow-600 shadow-2xl">
 
-        {/* Nome */}
-        <div className="bg-yellow-200 border-4 border-yellow-600 rounded-xl px-3 py-1 flex justify-between items-center mb-3">
-          <h2 className="font-extrabold text-lg capitalize tracking-wide">
-            {props.name}
+        <div className="bg-yellow-200 border-4 border-yellow-600 rounded-xl px-3 py-1 mb-3">
+          <h2 className="font-extrabold text-lg capitalize">
+            {pokemon.name} - {pokemon.id}
           </h2>
-          <span className="text-sm font-bold">Basic</span>
         </div>
 
-        {/* Immagine */}
-        <div className="bg-gradient-to-b from-blue-100 to-blue-200 border-4 border-yellow-600 rounded-xl p-4 mb-3 aspect-square flex items-center justify-center shadow-inner">
+        <div className="bg-white border-4 border-yellow-600 rounded-xl p-4 mb-3 aspect-square flex items-center justify-center">
           <img
-            src={props.image}
-            className="w-full h-full object-contain drop-shadow-lg"
-            alt={props.name}
+            src={pokemon.image}
+            className="w-full h-full object-contain"
+            alt={pokemon.name}
           />
         </div>
 
-        {/* Tipo */}
         <div className="bg-yellow-100 border-4 border-yellow-600 rounded-xl p-3 mb-4 text-center">
           <p className="text-sm font-semibold capitalize">
-            Tipo: {props.types.join(", ")}
+            Tipo: {pokemon.types.join(", ")}
           </p>
         </div>
 
-        {/* Bottone */}
-        <div className="flex justify-center">
-          <button className="bg-blue-600 hover:bg-blue-700 transition-all duration-200 text-white px-8 py-2 rounded-full font-bold text-md shadow-lg active:scale-95">
+        <div className="flex flex-col items-center">
+          <button
+            onClick={() => setShowDetails(!showDetails)}
+            className="bg-blue-600 text-white px-6 py-2 rounded-full font-bold"
+          >
             Dettagli
           </button>
-        </div>
 
+          {showDetails && (
+            <div className="mt-3 text-sm text-center capitalize">
+              Abilità: {pokemon.abilities.join(", ")}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
 export function Root() {
-  return <Card
-    image="https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/025.png"
-    name="Pikachu - 0"
-    types={["electric"]}
-    />
+  const [pokemons, setPokemons] = useState<Pokemon[]>([]);
+  const [offset, setOffset] = useState(0);
+  const limit = 12; // primo caricamento
+
+  async function fetchPokemons(newOffset: number, amount: number) {
+    const res = await fetch(
+      `https://pokeapi.co/api/v2/pokemon?offset=${newOffset}&limit=${amount}`
+    );
+    const data = await res.json();
+
+    const results = await Promise.all(
+      data.results.map(async (p: any) => {
+        const res = await fetch(p.url);
+        const details = await res.json();
+
+        return {
+          id: details.id,
+          name: details.name,
+          image:
+            details.sprites.other["official-artwork"].front_default,
+          types: details.types.map((t: any) => t.type.name),
+          abilities: details.abilities.map(
+            (a: any) => a.ability.name
+          ),
+        };
+      })
+    );
+
+    setPokemons((prev) => [...prev, ...results]);
+  }
+
+  useEffect(() => {
+    fetchPokemons(0, limit);
+  }, []);
+
+  function loadMore() {
+    const newOffset = offset + 20;
+    setOffset(newOffset);
+    fetchPokemons(newOffset, 20);
+  }
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="flex flex-wrap justify-center">
+        {pokemons.map((pokemon) => (
+          <Card key={pokemon.id} pokemon={pokemon} />
+        ))}
+      </div>
+
+      <button
+        onClick={loadMore}
+        className="mt-8 mb-10 bg-red-600 hover:bg-red-700 text-white px-10 py-3 rounded-full font-bold text-lg"
+      >
+        Carica altri 20 Pokémon
+      </button>
+    </div>
+  );
 }
 
 /*
