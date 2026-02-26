@@ -10,20 +10,46 @@ interface Props {
 }
 
 function Card(props: Props) {
-  return <div className="bg-yellow-300 rounded-3xl p-6 w-80 mx-3 mt-3 shadow-xl border-4 border-yellow-400">
-    <div className="text-center font-bold mb-2 text-lg">{props.name}</div>
-    <div className="bg-white rounded-2xl p-4 mb-4 border-4 border-yellow-400 aspect-square flex items-center justify-center">
-      <img src={props.image} className="w-full h-full object-contain" />
+  return (
+    <div className="w-80 mx-3 mt-6">
+      
+      {/* Card Container */}
+      <div className="rounded-2xl p-3 bg-gradient-to-b from-yellow-300 to-yellow-500 border-8 border-yellow-600 shadow-2xl">
+
+        {/* Nome */}
+        <div className="bg-yellow-200 border-4 border-yellow-600 rounded-xl px-3 py-1 flex justify-between items-center mb-3">
+          <h2 className="font-extrabold text-lg capitalize tracking-wide">
+            {props.name}
+          </h2>
+          <span className="text-sm font-bold">Basic</span>
+        </div>
+
+        {/* Immagine */}
+        <div className="bg-gradient-to-b from-blue-100 to-blue-200 border-4 border-yellow-600 rounded-xl p-4 mb-3 aspect-square flex items-center justify-center shadow-inner">
+          <img
+            src={props.image}
+            className="w-full h-full object-contain drop-shadow-lg"
+            alt={props.name}
+          />
+        </div>
+
+        {/* Tipo */}
+        <div className="bg-yellow-100 border-4 border-yellow-600 rounded-xl p-3 mb-4 text-center">
+          <p className="text-sm font-semibold capitalize">
+            Tipo: {props.types.join(", ")}
+          </p>
+        </div>
+
+        {/* Bottone */}
+        <div className="flex justify-center">
+          <button className="bg-blue-600 hover:bg-blue-700 transition-all duration-200 text-white px-8 py-2 rounded-full font-bold text-md shadow-lg active:scale-95">
+            Dettagli
+          </button>
+        </div>
+
+      </div>
     </div>
-    <div className="bg-yellow-100 rounded-xl p-4 mb-4">
-      <div className="text-xs text-gray-700">Tipo: {props.types.join(", ")}</div>
-    </div>
-    <div className="flex justify-center">
-      <button className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-full font-bold text-lg shadow-md">
-        dettagli
-      </button>
-    </div>
-  </div>;
+  );
 }
 
 export function Root() {
