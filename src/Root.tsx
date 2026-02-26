@@ -88,6 +88,7 @@ function Card({ pokemon }: { pokemon: Pokemon }) {
 
           </div>
         )}
+
       </div>
     </div>
   );
@@ -95,11 +96,10 @@ function Card({ pokemon }: { pokemon: Pokemon }) {
 
 export function Root() {
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
-  const [offset, setOffset] = useState(0);
 
-  async function fetchPokemons(newOffset: number, amount: number) {
+  async function fetchPokemons(offset: number, amount: number) {
     const res = await fetch(
-      `https://pokeapi.co/api/v2/pokemon?offset=${newOffset}&limit=${amount}`
+      `https://pokeapi.co/api/v2/pokemon?offset=${offset}&limit=${amount}`
     );
     const data = await res.json();
 
@@ -132,11 +132,7 @@ export function Root() {
   }
 
   function loadMore() {
-    setOffset((prev) => {
-      const newOffset = prev + 20;
-      fetchPokemons(newOffset, 20);
-      return newOffset;
-    });
+    fetchPokemons(pokemons.length, 20);
   }
 
   useEffect(() => {
